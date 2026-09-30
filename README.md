@@ -28,7 +28,7 @@
 
 ---
 
-## 🌱 About Wellora
+## 🌱 About SafeZoners
 
 **safeZoners** is a workplace mental wellbeing platform that explores a more human-centered alternative to traditional questionnaire-only approaches.
 

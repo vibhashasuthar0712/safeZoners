@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌿 Wellora
+# 🌿 SafeZoners
 
 ### Workplace Mental Wellbeing, Reimagined
 
@@ -30,7 +30,7 @@
 
 ## 🌱 About Wellora
 
-**Wellora** is a workplace mental wellbeing platform that explores a more human-centered alternative to traditional questionnaire-only approaches.
+**safeZoners** is a workplace mental wellbeing platform that explores a more human-centered alternative to traditional questionnaire-only approaches.
 
 Instead of repeatedly asking employees direct questions about stress, anxiety, or wellbeing, Wellora gives them **voluntary ways to interact with the platform** through games, conversations, relaxation activities, check-ins, and private journaling.
 
@@ -54,7 +54,7 @@ Traditional Approach
               VS
 
 
-             Wellora
+             safeZoners
                 │
                 ▼
         Voluntary Engagement
@@ -80,7 +80,7 @@ Traditional Approach
 
 ---
 
-# ✨ Why Wellora?
+# ✨ Why SafeZoners?
 
 Workplace wellbeing is not always as simple as asking:
 
@@ -95,7 +95,7 @@ Employees may:
 * Want someone or something to talk to
 * Need human support when a situation becomes concerning
 
-Wellora therefore focuses on **choice, engagement, privacy, and support**.
+SafeZoners therefore focuses on **choice, engagement, privacy, and support**.
 
 ---
 
@@ -160,7 +160,7 @@ The **Talk & Share** feature provides an AI-supported conversational space where
 
 ### AI limitations are part of the design
 
-Wellora does **not** assume AI can perfectly understand someone's mental state.
+SafeZoners does **not** assume AI can perfectly understand someone's mental state.
 
 AI may:
 
@@ -169,7 +169,7 @@ AI may:
 * Receive incomplete information
 * Fail to recognize the seriousness of a situation
 
-Therefore, Wellora explores a **human-in-the-loop support model** rather than making AI the final authority.
+Therefore, SafeZoners explores a **human-in-the-loop support model** rather than making AI the final authority.
 
 ---
 
@@ -207,7 +207,7 @@ Sometimes people don't want to talk.
 
 They just want somewhere to write.
 
-Wellora provides a dedicated journal where employees can privately reflect on thoughts and experiences.
+SafeZoners provides a dedicated journal where employees can privately reflect on thoughts and experiences.
 
 ### Journal features
 
@@ -225,7 +225,7 @@ The journal is kept separate from the HR/responder wellbeing dashboard.
 
 # 🚨 From Detection to Support
 
-One of Wellora's important design questions is:
+One of SafeZoners's important design questions is:
 
 > **What happens after a concerning signal is detected?**
 
@@ -338,7 +338,7 @@ Rather than treating detection as the end of the process, Wellora explores a wor
 
 </div>
 
-> **Demo:** Wellora is currently a prototype designed for demonstration, evaluation, and concept validation. It is not a production clinical or emergency-response system.
+> **Demo:** SafeZoners is currently a prototype designed for demonstration, evaluation, and concept validation. It is not a production clinical or emergency-response system.
 
 ---
 
@@ -509,7 +509,7 @@ http://127.0.0.1:8000
 
 # 🔐 Privacy & Safety
 
-Wellora is designed with privacy and responsible AI use in mind.
+SafeZoners is designed with privacy and responsible AI use in mind.
 
 ### Principles
 
@@ -523,7 +523,7 @@ Wellora is designed with privacy and responsible AI use in mind.
 
 ### ⚠️ Important
 
-Wellora is a **wellbeing support prototype**, not:
+SafeZoners is a **wellbeing support prototype**, not:
 
 * A medical diagnostic system
 * A replacement for a psychologist or mental-health professional
@@ -534,7 +534,7 @@ Wellora is a **wellbeing support prototype**, not:
 
 # 📊 Wellbeing Signal Philosophy
 
-Wellora is built around **patterns rather than isolated scores**.
+SafeZoners is built around **patterns rather than isolated scores**.
 
 ```text
                  ┌─────────────────────┐
@@ -565,7 +565,7 @@ This reduces the risk of treating a single game score or response as proof of a 
 
 ---
 
-# 💡 What Makes Wellora Different?
+# 💡 What Makes SafeZoners Different?
 
 | Traditional Approach          | 🌿 Wellora                                   |
 | :---------------------------- | :------------------------------------------- |
@@ -581,7 +581,7 @@ This reduces the risk of treating a single game score or response as proof of a 
 
 # 🎯 Project Goals
 
-Wellora aims to make workplace wellbeing support:
+SafeZoners aims to make workplace wellbeing support:
 
 * 🌱 More approachable
 * 🧠 More human-centered
@@ -614,7 +614,7 @@ Possible future improvements include:
 
 # ⚠️ Current Prototype Limitations
 
-Wellora is currently a **working prototype**.
+SafeZoners is currently a **working prototype**.
 
 Current limitations include:
 
@@ -661,7 +661,7 @@ If you find the idea behind Wellora interesting:
 
 <div align="center">
 
-## 🌿 Wellora
+## 🌿 SafeZoners
 
 ### *Your wellbeing. Your privacy. Your support.*
 

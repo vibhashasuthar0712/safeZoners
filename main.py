@@ -50,6 +50,35 @@ else:
 
 
 # ============================================================
+# PUBLIC DEMO MODE
+# ============================================================
+#
+# When DEMO_MODE=true:
+#
+# Employee login:
+#   - Any email is accepted
+#   - Any password is accepted
+#   - New employee is automatically created
+#   - Existing employee can login without password check
+#
+# HR / Responder:
+#   - Normal authentication remains active
+#
+# IMPORTANT:
+# Keep DEMO_MODE=false for a real production/private deployment.
+#
+# ============================================================
+
+DEMO_MODE = (
+    os.getenv(
+        "DEMO_MODE",
+        "false"
+    ).lower()
+    == "true"
+)
+
+
+# ============================================================
 # REQUEST MODELS
 # ============================================================
 
@@ -115,13 +144,21 @@ class JournalEntryRequest(BaseModel):
 # ============================================================
 
 def hash_password(password: str):
+
     return hashlib.sha256(
         password.encode("utf-8")
     ).hexdigest()
 
 
-def verify_password(password: str, password_hash: str):
-    return hash_password(password) == password_hash
+def verify_password(
+    password: str,
+    password_hash: str
+):
+
+    return (
+        hash_password(password)
+        == password_hash
+    )
 
 
 # ============================================================
@@ -146,7 +183,8 @@ def home():
     except FileNotFoundError:
 
         return {
-            "message": "Wellora API is running."
+            "message":
+                "Wellora API is running."
         }
 
 
@@ -154,7 +192,10 @@ def home():
 # PAGE ROUTES
 # ============================================================
 
-@app.get("/employee", response_class=HTMLResponse)
+@app.get(
+    "/employee",
+    response_class=HTMLResponse
+)
 def employee_page():
 
     with open(
@@ -168,7 +209,10 @@ def employee_page():
         )
 
 
-@app.get("/checkin", response_class=HTMLResponse)
+@app.get(
+    "/checkin",
+    response_class=HTMLResponse
+)
 def checkin_page():
 
     with open(
@@ -182,7 +226,10 @@ def checkin_page():
         )
 
 
-@app.get("/hr", response_class=HTMLResponse)
+@app.get(
+    "/hr",
+    response_class=HTMLResponse
+)
 def hr_page():
 
     with open(
@@ -196,7 +243,10 @@ def hr_page():
         )
 
 
-@app.get("/responder", response_class=HTMLResponse)
+@app.get(
+    "/responder",
+    response_class=HTMLResponse
+)
 def responder_page():
 
     with open(
@@ -210,7 +260,10 @@ def responder_page():
         )
 
 
-@app.get("/game", response_class=HTMLResponse)
+@app.get(
+    "/game",
+    response_class=HTMLResponse
+)
 def game_page():
 
     with open(
@@ -224,7 +277,10 @@ def game_page():
         )
 
 
-@app.get("/reaction", response_class=HTMLResponse)
+@app.get(
+    "/reaction",
+    response_class=HTMLResponse
+)
 def reaction_page():
 
     with open(
@@ -238,7 +294,10 @@ def reaction_page():
         )
 
 
-@app.get("/memory", response_class=HTMLResponse)
+@app.get(
+    "/memory",
+    response_class=HTMLResponse
+)
 def memory_page():
 
     with open(
@@ -252,7 +311,10 @@ def memory_page():
         )
 
 
-@app.get("/color", response_class=HTMLResponse)
+@app.get(
+    "/color",
+    response_class=HTMLResponse
+)
 def color_page():
 
     with open(
@@ -266,7 +328,10 @@ def color_page():
         )
 
 
-@app.get("/choice", response_class=HTMLResponse)
+@app.get(
+    "/choice",
+    response_class=HTMLResponse
+)
 def choice_page():
 
     with open(
@@ -280,7 +345,10 @@ def choice_page():
         )
 
 
-@app.get("/relax", response_class=HTMLResponse)
+@app.get(
+    "/relax",
+    response_class=HTMLResponse
+)
 def relax_page():
 
     with open(
@@ -294,7 +362,10 @@ def relax_page():
         )
 
 
-@app.get("/talk", response_class=HTMLResponse)
+@app.get(
+    "/talk",
+    response_class=HTMLResponse
+)
 def talk_page():
 
     with open(
@@ -312,7 +383,10 @@ def talk_page():
 # PRIVATE JOURNAL PAGE
 # ============================================================
 
-@app.get("/journal", response_class=HTMLResponse)
+@app.get(
+    "/journal",
+    response_class=HTMLResponse
+)
 def journal_page():
 
     try:
@@ -345,10 +419,12 @@ def register(
     db: Session = Depends(get_db)
 ):
 
+    email = request.email.strip().lower()
+
     existing_employee = (
         db.query(Employee)
         .filter(
-            Employee.email == request.email
+            Employee.email == email
         )
         .first()
     )
@@ -362,7 +438,7 @@ def register(
 
     employee = Employee(
         name=request.name,
-        email=request.email,
+        email=email,
         password_hash=hash_password(
             request.password
         ),
@@ -374,11 +450,21 @@ def register(
     db.refresh(employee)
 
     return {
-        "message": "Registration successful",
-        "employee_id": employee.id,
-        "name": employee.name,
-        "email": employee.email,
-        "role": employee.role
+
+        "message":
+            "Registration successful",
+
+        "employee_id":
+            employee.id,
+
+        "name":
+            employee.name,
+
+        "email":
+            employee.email,
+
+        "role":
+            employee.role
     }
 
 
@@ -392,10 +478,126 @@ def login(
     db: Session = Depends(get_db)
 ):
 
+    # --------------------------------------------------------
+    # Clean email
+    # --------------------------------------------------------
+
+    email = (
+        request.email
+        .strip()
+        .lower()
+    )
+
+    # ========================================================
+    # PUBLIC EMPLOYEE DEMO LOGIN
+    # ========================================================
+    #
+    # In demo mode:
+    #
+    # Employee can enter:
+    #
+    # Email: anything@gmail.com
+    # Password: anything
+    #
+    # No registration required.
+    #
+    # ========================================================
+
+    if (
+        DEMO_MODE
+        and request.role == "employee"
+    ):
+
+        employee = (
+            db.query(Employee)
+            .filter(
+                Employee.email == email
+            )
+            .first()
+        )
+
+        # ----------------------------------------------------
+        # NEW DEMO USER
+        # ----------------------------------------------------
+
+        if not employee:
+
+            # Create a simple display name
+            # from the email address.
+
+            email_name = (
+                email
+                .split("@")[0]
+                .strip()
+            )
+
+            name = (
+                email_name
+                .replace(".", " ")
+                .replace("_", " ")
+                .replace("-", " ")
+                .title()
+            )
+
+            if not name:
+
+                name = "Demo User"
+
+            employee = Employee(
+
+                name=name,
+
+                email=email,
+
+                password_hash=hash_password(
+                    request.password
+                ),
+
+                role="employee"
+            )
+
+            db.add(employee)
+
+            db.commit()
+
+            db.refresh(employee)
+
+        # ----------------------------------------------------
+        # IMPORTANT
+        #
+        # If employee already exists, password is NOT checked
+        # in public demo mode.
+        # ----------------------------------------------------
+
+        return {
+
+            "message":
+                "Demo login successful",
+
+            "employee_id":
+                employee.id,
+
+            "name":
+                employee.name,
+
+            "email":
+                employee.email,
+
+            "role":
+                employee.role,
+
+            "demo_mode":
+                True
+        }
+
+    # ========================================================
+    # NORMAL LOGIN
+    # ========================================================
+
     employee = (
         db.query(Employee)
         .filter(
-            Employee.email == request.email
+            Employee.email == email
         )
         .first()
     )
@@ -406,6 +608,10 @@ def login(
             status_code=401,
             detail="Invalid email or password."
         )
+
+    # --------------------------------------------------------
+    # Password verification
+    # --------------------------------------------------------
 
     if not verify_password(
         request.password,
@@ -433,11 +639,24 @@ def login(
         )
 
     return {
-        "message": "Login successful",
-        "employee_id": employee.id,
-        "name": employee.name,
-        "email": employee.email,
-        "role": employee.role
+
+        "message":
+            "Login successful",
+
+        "employee_id":
+            employee.id,
+
+        "name":
+            employee.name,
+
+        "email":
+            employee.email,
+
+        "role":
+            employee.role,
+
+        "demo_mode":
+            False
     }
 
 
@@ -468,22 +687,31 @@ def save_game_result(
 
     result = GameResult(
 
-        employee_id=request.employee_id,
+        employee_id=
+            request.employee_id,
 
-        game_name=request.game_name,
+        game_name=
+            request.game_name,
 
-        time_taken=request.time_taken,
+        time_taken=
+            request.time_taken,
 
-        correct=request.correct,
+        correct=
+            request.correct,
 
-        wrong=request.wrong,
+        wrong=
+            request.wrong,
 
-        accuracy=request.accuracy,
+        accuracy=
+            request.accuracy,
 
-        score=request.score,
+        score=
+            request.score,
 
         metrics=(
-            json.dumps(request.metrics)
+            json.dumps(
+                request.metrics
+            )
             if request.metrics
             else None
         )
@@ -500,8 +728,8 @@ def save_game_result(
     all_results = (
         db.query(GameResult)
         .filter(
-            GameResult.employee_id ==
-            request.employee_id
+            GameResult.employee_id
+            == request.employee_id
         )
         .order_by(
             GameResult.created_at.asc()
@@ -525,8 +753,8 @@ def save_game_result(
         existing_case = (
             db.query(RiskCase)
             .filter(
-                RiskCase.employee_id ==
-                request.employee_id,
+                RiskCase.employee_id
+                == request.employee_id,
 
                 RiskCase.status.in_(
                     [
@@ -542,22 +770,30 @@ def save_game_result(
 
             risk_case = RiskCase(
 
-                employee_id=request.employee_id,
+                employee_id=
+                    request.employee_id,
 
-                risk_score=risk["risk_score"],
+                risk_score=
+                    risk["risk_score"],
 
-                risk_level=risk["risk_level"],
+                risk_level=
+                    risk["risk_level"],
 
-                signals=json.dumps(
-                    risk["signals"]
-                ),
+                signals=
+                    json.dumps(
+                        risk["signals"]
+                    ),
 
                 status="new"
             )
 
             db.add(risk_case)
+
             db.commit()
-            db.refresh(risk_case)
+
+            db.refresh(
+                risk_case
+            )
 
     return {
 
@@ -585,7 +821,9 @@ def save_game_result(
 # GAME HISTORY
 # ============================================================
 
-@app.get("/game-history/{employee_id}")
+@app.get(
+    "/game-history/{employee_id}"
+)
 def game_history(
     employee_id: int,
     db: Session = Depends(get_db)
@@ -594,8 +832,8 @@ def game_history(
     results = (
         db.query(GameResult)
         .filter(
-            GameResult.employee_id ==
-            employee_id
+            GameResult.employee_id
+            == employee_id
         )
         .order_by(
             GameResult.created_at.asc()
@@ -606,6 +844,7 @@ def game_history(
     return [
 
         {
+
             "id":
                 result.id,
 
@@ -628,7 +867,9 @@ def game_history(
                 result.score,
 
             "metrics": (
-                json.loads(result.metrics)
+                json.loads(
+                    result.metrics
+                )
                 if result.metrics
                 else {}
             ),
@@ -645,7 +886,9 @@ def game_history(
 # EMPLOYEE RISK
 # ============================================================
 
-@app.get("/employee-risk/{employee_id}")
+@app.get(
+    "/employee-risk/{employee_id}"
+)
 def employee_risk(
     employee_id: int,
     db: Session = Depends(get_db)
@@ -654,8 +897,8 @@ def employee_risk(
     results = (
         db.query(GameResult)
         .filter(
-            GameResult.employee_id ==
-            employee_id
+            GameResult.employee_id
+            == employee_id
         )
         .order_by(
             GameResult.created_at.asc()
@@ -688,6 +931,7 @@ def employees(
     return [
 
         {
+
             "id":
                 employee.id,
 
@@ -709,7 +953,9 @@ def employees(
 # RESPONDER - ACTIVE CASES
 # ============================================================
 
-@app.get("/responder/cases")
+@app.get(
+    "/responder/cases"
+)
 def responder_cases(
     db: Session = Depends(get_db)
 ):
@@ -737,8 +983,8 @@ def responder_cases(
         employee = (
             db.query(Employee)
             .filter(
-                Employee.id ==
-                case.employee_id
+                Employee.id
+                == case.employee_id
             )
             .first()
         )
@@ -746,6 +992,7 @@ def responder_cases(
         response.append(
 
             {
+
                 "id":
                     case.id,
 
@@ -771,7 +1018,9 @@ def responder_cases(
                     case.risk_level,
 
                 "signals": (
-                    json.loads(case.signals)
+                    json.loads(
+                        case.signals
+                    )
                     if case.signals
                     else []
                 ),
@@ -852,6 +1101,7 @@ def acknowledge_case(
     )
 
     db.commit()
+
     db.refresh(case)
 
     return {
@@ -884,8 +1134,11 @@ def update_case_status(
 ):
 
     allowed_statuses = [
+
         "new",
+
         "in_progress",
+
         "resolved"
     ]
 
@@ -920,6 +1173,7 @@ def update_case_status(
         )
 
     db.commit()
+
     db.refresh(case)
 
     return {
@@ -990,6 +1244,7 @@ def escalate_case(
     )
 
     db.commit()
+
     db.refresh(case)
 
     return {
@@ -1025,7 +1280,9 @@ def escalate_case(
 # HR OVERVIEW
 # ============================================================
 
-@app.get("/hr/overview")
+@app.get(
+    "/hr/overview"
+)
 def hr_overview(
     db: Session = Depends(get_db)
 ):
@@ -1054,8 +1311,8 @@ def hr_overview(
         results = (
             db.query(GameResult)
             .filter(
-                GameResult.employee_id ==
-                employee.id
+                GameResult.employee_id
+                == employee.id
             )
             .order_by(
                 GameResult.created_at.asc()
@@ -1807,10 +2064,15 @@ def save_journal_entry(
     # --------------------------------------------------------
 
     allowed_feelings = [
+
         "A little better",
+
         "Same as before",
+
         "Still overwhelmed",
+
         "More calm",
+
         "Prefer not to say"
     ]
 
@@ -1818,7 +2080,9 @@ def save_journal_entry(
 
     if feeling_after is not None:
 
-        feeling_after = feeling_after.strip()
+        feeling_after = (
+            feeling_after.strip()
+        )
 
         if feeling_after == "":
 
@@ -1838,7 +2102,8 @@ def save_journal_entry(
     employee = (
         db.query(Employee)
         .filter(
-            Employee.id == request.employee_id
+            Employee.id
+            == request.employee_id
         )
         .first()
     )
@@ -1864,15 +2129,20 @@ def save_journal_entry(
 
     entry = JournalEntry(
 
-        employee_id=request.employee_id,
+        employee_id=
+            request.employee_id,
 
-        content=content,
+        content=
+            content,
 
-        feeling_after=feeling_after
+        feeling_after=
+            feeling_after
     )
 
     db.add(entry)
+
     db.commit()
+
     db.refresh(entry)
 
     return {
@@ -1895,7 +2165,9 @@ def save_journal_entry(
 # PRIVATE JOURNAL - GET ENTRIES
 # ============================================================
 
-@app.get("/journal/{employee_id}")
+@app.get(
+    "/journal/{employee_id}"
+)
 def get_journal_entries(
     employee_id: int,
     db: Session = Depends(get_db)
@@ -1927,8 +2199,8 @@ def get_journal_entries(
     entries = (
         db.query(JournalEntry)
         .filter(
-            JournalEntry.employee_id ==
-            employee_id
+            JournalEntry.employee_id
+            == employee_id
         )
         .order_by(
             JournalEntry.created_at.desc()
@@ -1939,6 +2211,7 @@ def get_journal_entries(
     return [
 
         {
+
             "id":
                 entry.id,
 
@@ -1960,7 +2233,9 @@ def get_journal_entries(
 # PRIVATE JOURNAL - DELETE ENTRY
 # ============================================================
 
-@app.delete("/journal/{entry_id}")
+@app.delete(
+    "/journal/{entry_id}"
+)
 def delete_journal_entry(
     entry_id: int,
     db: Session = Depends(get_db)
@@ -1982,6 +2257,7 @@ def delete_journal_entry(
         )
 
     db.delete(entry)
+
     db.commit()
 
     return {
@@ -1995,7 +2271,9 @@ def delete_journal_entry(
 # CHECK-IN - GET CASE DETAILS
 # ============================================================
 
-@app.get("/checkin/{case_id}")
+@app.get(
+    "/checkin/{case_id}"
+)
 def get_checkin_case(
     case_id: int,
     db: Session = Depends(get_db)
@@ -2019,7 +2297,8 @@ def get_checkin_case(
     employee = (
         db.query(Employee)
         .filter(
-            Employee.id == case.employee_id
+            Employee.id
+            == case.employee_id
         )
         .first()
     )
@@ -2048,12 +2327,13 @@ def get_checkin_case(
         "risk_level":
             case.risk_level,
 
-        "signals":
-            (
-                json.loads(case.signals)
-                if case.signals
-                else []
-            ),
+        "signals": (
+            json.loads(
+                case.signals
+            )
+            if case.signals
+            else []
+        ),
 
         "status":
             case.status,
@@ -2081,7 +2361,9 @@ def get_checkin_case(
 # CHECK-IN - SUBMIT CHECK-IN
 # ============================================================
 
-@app.post("/checkin/{case_id}/submit")
+@app.post(
+    "/checkin/{case_id}/submit"
+)
 def submit_checkin(
     case_id: int,
     request: CheckinRequest,
@@ -2140,9 +2422,13 @@ def submit_checkin(
         )
 
         case.escalation_reason = (
+
             request.checkin_notes.strip()
+
             if request.checkin_notes.strip()
-            else "Support required after check-in."
+
+            else
+            "Support required after check-in."
         )
 
         case.escalated_at = (
@@ -2162,6 +2448,7 @@ def submit_checkin(
         case.status = "in_progress"
 
     db.commit()
+
     db.refresh(case)
 
     return {
@@ -2209,5 +2496,8 @@ def health():
             True,
 
         "ai_enabled":
-            client is not None
+            client is not None,
+
+        "demo_mode":
+            DEMO_MODE
     }
